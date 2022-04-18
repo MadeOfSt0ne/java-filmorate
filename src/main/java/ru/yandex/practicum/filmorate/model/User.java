@@ -10,10 +10,10 @@ import java.time.LocalDate;
 @Data
 public class User {
 
-    @NonNull
     private final int userId;
     @Email
     private String email;
+    @NonNull
     @NotBlank
     private String login;
     private String name;

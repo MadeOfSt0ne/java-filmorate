@@ -21,6 +21,7 @@ public class FilmController {
 
     @GetMapping("/films")
     public List<Film> getAll() {
+        log.debug("Текущее количество фильмов: {}", films.size());
         return films;
     }
 
@@ -29,8 +30,10 @@ public class FilmController {
         if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH
                 || film.getReleaseDate().isAfter(CINEMA_BIRTHDATE)
         ) {
+            log.debug("Ошибка валидации по запросу POST /film");
             throw new ValidationException();
         }
+        log.debug("Добавлен новый фильм: {}", film);
         films.add(film);
     }
 
@@ -39,8 +42,10 @@ public class FilmController {
         if (changedFilm.getDescription().length() > MAX_DESCRIPTION_LENGTH
                 || changedFilm.getReleaseDate().isAfter(CINEMA_BIRTHDATE)
         ) {
+            log.debug("Ошибка валидации по запросу PUT /film");
             throw new ValidationException();
         }
+        log.debug("Информация о фильме {} успешно обновлена", changedFilm.getName());
         Film savedFilm = films.get(changedFilm.getFilmId());
         savedFilm.setDescription(changedFilm.getDescription());
         }

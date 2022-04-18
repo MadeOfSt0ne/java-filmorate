@@ -24,20 +24,24 @@ public class UserController {
     @PostMapping("/user")
     public void addUser(@Valid @RequestBody User user) throws ValidationException {
         if (user.getBirthdate().isAfter(LocalDate.now())) {
+            log.debug("Ошибка валидации по запросу POST /user");
             throw new ValidationException();
         } else if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
+        log.debug("Добавлен новый пользователь: {}", user);
         users.add(user);
     }
 
     @PutMapping("/user")
     public void updateUser(@Valid @RequestBody User changedUser) throws ValidationException {
         if (changedUser.getBirthdate().isAfter(LocalDate.now())) {
+            log.debug("Ошибка валидации по запросу PUT /user");
             throw new ValidationException();
         } else if (changedUser.getName().isBlank()) {
             changedUser.setName(changedUser.getName());
         }
+        log.debug("Данные пользователя {} успешно обновлены", changedUser.getName());
         User savedUser = users.get(changedUser.getUserId());
         savedUser.setName(changedUser.getName());
         savedUser.setEmail(changedUser.getEmail());
