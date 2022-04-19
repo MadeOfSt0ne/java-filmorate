@@ -8,16 +8,17 @@ import ru.yandex.practicum.filmorate.model.User;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
 @Slf4j
 public class UserController {
 
-    private final List<User> users = new ArrayList<>();
+    private final HashMap<Integer, User> users = new HashMap<>();
 
     @GetMapping("/users")
-    public List<User> getAll() {
+    public HashMap<Integer, User> getAll() {
         return users;
     }
 
@@ -30,7 +31,7 @@ public class UserController {
             user.setName(user.getLogin());
         }
         log.debug("Добавлен новый пользователь: {}", user);
-        users.add(user);
+        users.put(user.getUserId(), user);
     }
 
     @PutMapping("/user")
@@ -47,5 +48,10 @@ public class UserController {
         savedUser.setEmail(changedUser.getEmail());
         savedUser.setBirthdate(changedUser.getBirthdate());
         savedUser.setLogin(changedUser.getLogin());
+    }
+
+    // метод для очистки мапы. нужен для тестов
+    public void clearMap() {
+        users.clear();
     }
 }
