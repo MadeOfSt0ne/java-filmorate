@@ -26,7 +26,7 @@ public class FilmController {
         return films;
     }
 
-    @PostMapping("/film")
+    @PostMapping("/films")
     public void addFilm(@Valid @RequestBody Film film) throws ValidationException {
         if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH
                 || film.getReleaseDate().isBefore(CINEMA_BIRTHDATE)
@@ -40,7 +40,7 @@ public class FilmController {
         films.put(film.getFilmId(), film);
     }
 
-    @PutMapping("/film")
+    @PutMapping("/films")
     public void updateFilm(@Valid @RequestBody Film changedFilm) throws ValidationException {
         if (changedFilm.getDescription().length() > MAX_DESCRIPTION_LENGTH
                 || changedFilm.getReleaseDate().isBefore(CINEMA_BIRTHDATE)

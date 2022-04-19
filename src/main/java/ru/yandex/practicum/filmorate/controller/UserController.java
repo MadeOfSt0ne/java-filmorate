@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+@Validated
 @RestController
 @Slf4j
 public class UserController {
@@ -22,9 +24,9 @@ public class UserController {
         return users;
     }
 
-    @PostMapping("/user")
+    @PostMapping("/users")
     public void addUser(@Valid @RequestBody User user) throws ValidationException {
-        if (user.getBirthdate().isAfter(LocalDate.now())) {
+        if (user.getBirthdate().isAfter(LocalDate.now()) || user.getLogin().contains(" ")) {
             log.debug("Ошибка валидации по запросу POST /user");
             throw new ValidationException();
         } else if (user.getName().isBlank()) {
@@ -34,9 +36,9 @@ public class UserController {
         users.put(user.getUserId(), user);
     }
 
-    @PutMapping("/user")
+    @PutMapping("/users")
     public void updateUser(@Valid @RequestBody User changedUser) throws ValidationException {
-        if (changedUser.getBirthdate().isAfter(LocalDate.now())) {
+        if (changedUser.getBirthdate().isAfter(LocalDate.now()) || changedUser.getLogin().contains(" ")) {
             log.debug("Ошибка валидации по запросу PUT /user");
             throw new ValidationException();
         } else if (changedUser.getName().isBlank()) {
