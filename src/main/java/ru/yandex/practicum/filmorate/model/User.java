@@ -17,9 +17,10 @@ public class User {
     private String login;
     private String name;
     private int id;
-    @Email
+    // Если поставить аннотацию @Email, то сервер вернет код 400, а если ее убрать то проверка на @ выдаст
+    // ValidationException и вернет код 500. Тесты требуют 500, поэтому закомментировал аннотацию.
+    //@Email
     private String email;
-    @NonNull
     private LocalDate birthday;
 
 }

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Validated
 @RestController
 @Slf4j
 public class UserController {
@@ -27,7 +26,9 @@ public class UserController {
 
     @PostMapping("/users")
     public void addUser(@Valid @RequestBody User user) throws ValidationException {
-        if (user.getBirthday().isAfter(LocalDate.now()) || user.getLogin().contains(" ")) {
+        if (user.getBirthday().isAfter(LocalDate.now())
+                || user.getLogin().contains(" ")
+                || !user.getEmail().contains("@")) {
             log.debug("Ошибка валидации по запросу POST /user");
             throw new ValidationException();
         } else if (user.getName().isBlank()) {
@@ -44,7 +45,9 @@ public class UserController {
             log.debug("пользователь не найден. id: {}", changedUser.getId());
             return;
         }
-        if (changedUser.getBirthday().isAfter(LocalDate.now()) || changedUser.getLogin().contains(" ")) {
+        if (changedUser.getBirthday().isAfter(LocalDate.now())
+                || changedUser.getLogin().contains(" ")
+                || !changedUser.getEmail().contains("@")) {
             log.debug("Ошибка валидации по запросу PUT /user");
             throw new ValidationException();
         } else if (changedUser.getName().isBlank()) {
