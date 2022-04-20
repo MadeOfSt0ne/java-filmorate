@@ -12,14 +12,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class User {
 
-    private final int userId;
-    @Email
-    private String email;
     @NonNull
     @NotBlank
     private String login;
     private String name;
+    private int id;
+    @Email
+    private String email;
     @NonNull
-    private LocalDate birthdate;
+    private LocalDate birthday;
 
 }

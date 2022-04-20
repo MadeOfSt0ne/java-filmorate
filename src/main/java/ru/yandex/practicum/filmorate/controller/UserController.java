@@ -18,6 +18,7 @@ import java.util.List;
 public class UserController {
 
     private final HashMap<Integer, User> users = new HashMap<>();
+    private int id = 1;
 
     @GetMapping("/users")
     public HashMap<Integer, User> getAll() {
@@ -26,34 +27,40 @@ public class UserController {
 
     @PostMapping("/users")
     public void addUser(@Valid @RequestBody User user) throws ValidationException {
-        if (user.getBirthdate().isAfter(LocalDate.now()) || user.getLogin().contains(" ")) {
+        if (user.getBirthday().isAfter(LocalDate.now()) || user.getLogin().contains(" ")) {
             log.debug("Ошибка валидации по запросу POST /user");
             throw new ValidationException();
         } else if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        log.debug("Добавлен новый пользователь: {}", user);
-        users.put(user.getUserId(), user);
+        log.debug("Добавлен новый пользователь: {}, {}", id, user);
+        users.put(id, user);
+        id++;
     }
 
     @PutMapping("/users")
     public void updateUser(@Valid @RequestBody User changedUser) throws ValidationException {
-        if (changedUser.getBirthdate().isAfter(LocalDate.now()) || changedUser.getLogin().contains(" ")) {
+        if (!users.containsKey(changedUser.getId())) {
+            log.debug("пользователь не найден. id: {}", changedUser.getId());
+            return;
+        }
+        if (changedUser.getBirthday().isAfter(LocalDate.now()) || changedUser.getLogin().contains(" ")) {
             log.debug("Ошибка валидации по запросу PUT /user");
             throw new ValidationException();
         } else if (changedUser.getName().isBlank()) {
             changedUser.setName(changedUser.getName());
         }
         log.debug("Данные пользователя {} успешно обновлены", changedUser.getName());
-        User savedUser = users.get(changedUser.getUserId());
+        User savedUser = users.get(changedUser.getId());
         savedUser.setName(changedUser.getName());
         savedUser.setEmail(changedUser.getEmail());
-        savedUser.setBirthdate(changedUser.getBirthdate());
+        savedUser.setBirthday(changedUser.getBirthday());
         savedUser.setLogin(changedUser.getLogin());
     }
 
     // метод для очистки мапы. нужен для тестов
     public void clearMap() {
         users.clear();
+        id = 1;
     }
 }

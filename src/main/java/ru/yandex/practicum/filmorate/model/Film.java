@@ -12,9 +12,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Film {
 
-    private final int filmId;
     @NonNull
     private String name;
+    private int id;
     private String description;
     @NonNull
     private LocalDate releaseDate;

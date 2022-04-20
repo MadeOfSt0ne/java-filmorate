@@ -21,15 +21,15 @@ class UserControllerTest {
 
     @BeforeEach
     void beforeTests() {
-        validUser = new User(1, "aa@aa.ru", "aa", "Mike", LocalDate.of(2000, 2, 2));
-        validUser1 = new User(2, "oo@oo.ru", "tt", "Sandy", LocalDate.of(1990, 10, 10));
-        blankName = new User(3, "ee@ee.com", "loginShouldBeName", "", LocalDate.of(1900, 3, 3));
-        loginWithSpaces = new User(4, "al@al.ru", "qwe  rty", "Peter", LocalDate.of(2001, 2, 3));
-        blankLogin = new User(5, "ff@ff.ru", " ", "Joe", LocalDate.of(2020, 5, 5));
-        invalidBirthdate = new User(6, "gg@gg.ru", "op", "John", LocalDate.of(2022, 5, 15));
-        newLoginWithSpaces = new User(1, "email@email.com", "qwe rty", "Peter", LocalDate.of(2001, 2, 3));
-        newBlankLogin = new User(1, "ads@ads.ru", " ", "Artur", LocalDate.of(1987, 2, 18));
-        newInvalidBirthdate = new User(1, "sss@sss.ru", "JJ", "Andrew", LocalDate.of(2025, 1, 1));
+        validUser = new User("aa", "Mike", 1,"Mike@gmail.com",LocalDate.of(2000, 2, 2));
+        validUser1 = new User("oo@edd.ru", "tt", 2, "Sandy@ya.ru", LocalDate.of(1990, 10, 10));
+        blankName = new User("loginShouldBecomeName", "", 2, "qwerty@qwerty.ru", LocalDate.of(1900, 3, 3));
+        loginWithSpaces = new User("agf dgs", "qwefty", 3, "Peter@yahoo.com", LocalDate.of(2001, 2, 3));
+        blankLogin = new User(" ", "ff", 4, "Joe@mail.ru", LocalDate.of(2020, 5, 5));
+        invalidBirthdate = new User("gg", "op", 5, "John@list.ru", LocalDate.of(2022, 5, 15));
+        newLoginWithSpaces = new User("gjjgjg gjgjgj", "qwerty", 1, "Peter@pringles.com", LocalDate.of(2001, 2, 3));
+        newBlankLogin = new User(" ", "GG", 1, "Artur@yandex-team.ru", LocalDate.of(1987, 2, 18));
+        newInvalidBirthdate = new User("sss", "JJ", 1, "Andrew@bk.ru", LocalDate.of(2025, 1, 1));
 
         userController.clearMap();
     }

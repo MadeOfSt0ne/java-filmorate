@@ -22,20 +22,20 @@ class FilmControllerTest {
     @BeforeEach
     void beforeTests() {
         String str = "test";
-        validFilm = new Film(1, "Terminator", "robots vs men", LocalDate.of(1984, 10, 26), 108);
-        validFilm1 = new Film(11, "Avatar", "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162);
-        //Film nullName = new Film(2, null, "robots vs men", LocalDate.of(1984, 10, 26), 108); // тест не запускается - сразу NPE
-        blankName = new Film(3, " ", "robots vs men", LocalDate.of(1984, 10, 26), 108);
-        maxDescriptionLength = new Film(4, "Titanic", str.repeat(50), LocalDate.of(1997, 11, 1), 194);
-        negativeDuration = new Film(5, "Titanic", "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194);
-        zeroDuration = new Film(5, "Titanic", "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), 0);
-        invalidReleaseDate = new Film(6, "Titanic", "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194);
-        moreThan200Symbols = new Film(10, "Avatar", str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162);
-        newBlankName = new Film(1, " ", "new description", LocalDate.of(1984, 10, 26), 108);
-        newNegativeDuration = new Film(1, "Titanic", "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194);
-        newInvalidReleaseDate = new Film(1, "Titanic", "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194);
-        newMoreThan200Symbols = new Film(1, "Avatar", str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162);
-        newValidFilm = new Film(1, "Avatar", "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162);
+        validFilm = new Film("Terminator", 1, "robots vs men", LocalDate.of(1984, 10, 26), 108);
+        validFilm1 = new Film("Avatar", 2, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162);
+        //Film nullName = new Film(null, 3, "robots vs men", LocalDate.of(1984, 10, 26), 108); // тест не запускается - сразу NPE
+        blankName = new Film(" ", 4, "robots vs men", LocalDate.of(1984, 10, 26), 108);
+        maxDescriptionLength = new Film("Titanic", 5, str.repeat(50), LocalDate.of(1997, 11, 1), 194);
+        negativeDuration = new Film("Titanic", 6, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194);
+        zeroDuration = new Film("Titanic", 7, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), 0);
+        invalidReleaseDate = new Film("Titanic", 8, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194);
+        moreThan200Symbols = new Film("Avatar", 9, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162);
+        newBlankName = new Film(" ", 1, "new description", LocalDate.of(1984, 10, 26), 108);
+        newNegativeDuration = new Film("Titanic", 1, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194);
+        newInvalidReleaseDate = new Film("Titanic", 1, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194);
+        newMoreThan200Symbols = new Film("Avatar", 1, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162);
+        newValidFilm = new Film("Avatar", 11, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162);
         filmController.clearMap();
     }
 

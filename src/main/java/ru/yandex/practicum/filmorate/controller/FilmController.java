@@ -17,6 +17,7 @@ public class FilmController {
 
     private final int MAX_DESCRIPTION_LENGTH = 200;
     private final LocalDate CINEMA_BIRTHDATE = LocalDate.of(1895, 12, 28);
+    private int id = 1;
 
     private final HashMap<Integer, Film> films = new HashMap<>();
 
@@ -37,11 +38,16 @@ public class FilmController {
             throw new ValidationException();
         }
         log.debug("Добавлен новый фильм: {}", film);
-        films.put(film.getFilmId(), film);
+        films.put(film.getId(), film);
+        id++;
     }
 
     @PutMapping("/films")
     public void updateFilm(@Valid @RequestBody Film changedFilm) throws ValidationException {
+        if (!films.containsKey(changedFilm.getId())) {
+            log.debug("фильм не найден.  id: {}", id);
+            return;
+        }
         if (changedFilm.getDescription().length() > MAX_DESCRIPTION_LENGTH
                 || changedFilm.getReleaseDate().isBefore(CINEMA_BIRTHDATE)
                 || changedFilm.getName().isBlank()
@@ -51,7 +57,7 @@ public class FilmController {
             throw new ValidationException();
         }
         log.debug("Информация о фильме {} успешно обновлена", changedFilm.getName());
-        Film savedFilm = films.get(changedFilm.getFilmId());
+        Film savedFilm = films.get(changedFilm.getId());
         savedFilm.setName(changedFilm.getName());
         savedFilm.setDescription(changedFilm.getDescription());
         savedFilm.setReleaseDate(changedFilm.getReleaseDate());
@@ -61,5 +67,6 @@ public class FilmController {
     // метод для очистки мапы. нужен для тестов
     public void clearMap() {
         films.clear();
+        id = 1;
     }
 }
