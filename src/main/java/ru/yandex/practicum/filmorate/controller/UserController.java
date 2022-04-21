@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -20,20 +21,18 @@ public class UserController {
     private int id = 1;
 
     @GetMapping("/users")
-    public HashMap<Integer, User> getAll() {
-        return users;
+    public List<User> getAll() {
+        log.debug("Текущее количество пользователей: {}", users.size());
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping("/users")
     public void addUser(@Valid @RequestBody User user) throws ValidationException {
-        if (user.getBirthday().isAfter(LocalDate.now())
-                || user.getLogin().contains(" ")
-                || !user.getEmail().contains("@")) {
+        if (isInvalid(user)) {
             log.debug("Ошибка валидации по запросу POST /user");
             throw new ValidationException();
-        } else if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
         }
+        checkName(user);
         log.debug("Добавлен новый пользователь: {}, {}", id, user);
         users.put(id, user);
         id++;
@@ -45,20 +44,31 @@ public class UserController {
             log.debug("пользователь не найден. id: {}", changedUser.getId());
             return;
         }
-        if (changedUser.getBirthday().isAfter(LocalDate.now())
-                || changedUser.getLogin().contains(" ")
-                || !changedUser.getEmail().contains("@")) {
+        if (isInvalid(changedUser)) {
             log.debug("Ошибка валидации по запросу PUT /user");
             throw new ValidationException();
-        } else if (changedUser.getName().isBlank()) {
-            changedUser.setName(changedUser.getName());
         }
+        checkName(changedUser);
         log.debug("Данные пользователя {} успешно обновлены", changedUser.getName());
         User savedUser = users.get(changedUser.getId());
         savedUser.setName(changedUser.getName());
         savedUser.setEmail(changedUser.getEmail());
         savedUser.setBirthday(changedUser.getBirthday());
         savedUser.setLogin(changedUser.getLogin());
+    }
+
+    // метод для проверки имени: если имя пустое, используется логин
+    private void checkName(User user) {
+        if (user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+    }
+
+    // метод для валидации юзера
+    private boolean isInvalid(User user) {
+        return (user.getBirthday().isAfter(LocalDate.now())
+                || user.getLogin().contains(" ")
+                || !user.getEmail().contains("@"));
     }
 
     // метод для очистки мапы. нужен для тестов

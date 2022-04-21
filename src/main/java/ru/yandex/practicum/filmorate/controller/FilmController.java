@@ -15,25 +15,18 @@ import java.util.List;
 @Slf4j
 public class FilmController {
 
-    private final int MAX_DESCRIPTION_LENGTH = 200;
-    private final LocalDate CINEMA_BIRTHDATE = LocalDate.of(1895, 12, 28);
+    private final HashMap<Integer, Film> films = new HashMap<>();
     private int id = 1;
 
-    private final HashMap<Integer, Film> films = new HashMap<>();
-
     @GetMapping("/films")
-    public HashMap<Integer, Film> getAll() {
+    public List<Film> getAll() {
         log.debug("Текущее количество фильмов: {}", films.size());
-        return films;
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping("/films")
     public void addFilm(@Valid @RequestBody Film film) throws ValidationException {
-        if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH
-                || film.getReleaseDate().isBefore(CINEMA_BIRTHDATE)
-                || film.getName().isBlank()
-                || film.getDuration() <= 0
-        ) {
+        if (isInvalid(film)) {
             log.debug("Ошибка валидации по запросу POST /film");
             throw new ValidationException();
         }
@@ -48,11 +41,7 @@ public class FilmController {
             log.debug("фильм не найден.  id: {}", id);
             return;
         }
-        if (changedFilm.getDescription().length() > MAX_DESCRIPTION_LENGTH
-                || changedFilm.getReleaseDate().isBefore(CINEMA_BIRTHDATE)
-                || changedFilm.getName().isBlank()
-                || changedFilm.getDuration() <= 0
-        ) {
+        if (isInvalid(changedFilm)) {
             log.debug("Ошибка валидации по запросу PUT /film");
             throw new ValidationException();
         }
@@ -62,7 +51,18 @@ public class FilmController {
         savedFilm.setDescription(changedFilm.getDescription());
         savedFilm.setReleaseDate(changedFilm.getReleaseDate());
         savedFilm.setDuration(changedFilm.getDuration());
-     }
+    }
+
+    // метод для проверки валидности фильма
+    private boolean isInvalid(Film film) {
+        int MAX_DESCRIPTION_LENGTH = 200;
+        LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
+
+        return  (film.getDescription().length() > MAX_DESCRIPTION_LENGTH
+                || film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)
+                || film.getName().isBlank()
+                || film.getDuration() <= 0);
+    }
 
     // метод для очистки мапы. нужен для тестов
     public void clearMap() {
