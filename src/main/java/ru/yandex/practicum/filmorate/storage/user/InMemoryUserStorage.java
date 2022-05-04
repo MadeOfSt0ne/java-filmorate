@@ -54,16 +54,14 @@ public class InMemoryUserStorage implements UserStorage {
         users.remove(userId);
     }
 
+    @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }
 
+    @Override
     public User getUser(int userId) {
         return users.get(userId);
-    }
-
-    public Collection<Long> getFriendsById(int id) {
-        return users.get(id).getFriends();
     }
 
     // метод для проверки имени: если имя пустое, используется логин
@@ -82,7 +80,7 @@ public class InMemoryUserStorage implements UserStorage {
     // вспомогательный метод для очистки таблицы
     public void clearMap() {
         users.clear();
-        id = 1;
+        id = 0;
     }
 
 

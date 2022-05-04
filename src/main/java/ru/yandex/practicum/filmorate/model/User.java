@@ -3,12 +3,15 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+@Data
+@AllArgsConstructor
 public class User {
 
     @NonNull
@@ -23,7 +26,7 @@ public class User {
     private LocalDate birthday;
     private Set<Long> friends;
 
-    public User(String login, String name, int id, String email, LocalDate birthday) {
+    /*public User(String login, String name, int id, String email, LocalDate birthday) {
         this.login = login;
         this.name = name;
         this.id = id;
@@ -78,5 +81,5 @@ public class User {
 
     public void setFriends(Set<Long> friends) {
         this.friends = friends;
-    }
+    }*/
 }

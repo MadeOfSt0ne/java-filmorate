@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +26,7 @@ class UserControllerTest {
 
     @BeforeEach
     void beforeTests() {
-        validUser = new User("aa", "Mike", 1,"Mike@gmail.com",LocalDate.of(2000, 2, 2));
+        validUser = new User("aa", "Mike", 1,"Mike@gmail.com",LocalDate.of(2000, 2, 2), Set.of());
         validUser1 = new User("oo@edd.ru", "tt", 2, "Sandy@ya.ru", LocalDate.of(1990, 10, 10));
         blankName = new User("loginShouldBecomeName", "", 2, "qwerty@qwerty.ru", LocalDate.of(1900, 3, 3));
         loginWithSpaces = new User("agf dgs", "qwefty", 3, "Peter@yahoo.com", LocalDate.of(2001, 2, 3));

@@ -36,7 +36,7 @@ class FilmControllerTest {
         newInvalidReleaseDate = new Film("Titanic", 1, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194);
         newMoreThan200Symbols = new Film("Avatar", 1, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162);
         newValidFilm = new Film("Avatar", 11, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162);
-        filmController.clearMap();
+        inMemoryFilmStorage.clearMap();
     }
 
     @Test
