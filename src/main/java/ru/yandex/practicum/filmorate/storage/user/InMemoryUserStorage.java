@@ -1,0 +1,89 @@
+package ru.yandex.practicum.filmorate.storage.user;
+
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.User;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+
+@Component
+public class InMemoryUserStorage implements UserStorage {
+
+    private final HashMap<Integer, User> users = new HashMap<>();
+    private static int id = 0;
+
+    private static int getNextId() {
+        return id++;
+    }
+
+    @Override
+    public User addUser(User user) {
+        if (isInvalid(user)) {
+            throw new ValidationException("Ошибка валидации!");
+        }
+        checkName(user);
+        user.setId(getNextId());
+        users.put(user.getId(), user);
+        return user;
+    }
+
+    @Override
+    public User updateUser(User changedUser) {
+        if (!users.containsKey(changedUser.getId())) {
+            throw new UserNotFoundException("Пользователь не найден!");
+        }
+        if (isInvalid(changedUser)) {
+            throw new ValidationException("Невалидные данные пользователя");
+        }
+        checkName(changedUser);
+        User savedUser = users.get(changedUser.getId());
+        savedUser.setName(changedUser.getName());
+        savedUser.setEmail(changedUser.getEmail());
+        savedUser.setBirthday(changedUser.getBirthday());
+        savedUser.setLogin(changedUser.getLogin());
+        return savedUser;
+    }
+
+    @Override
+    public void deleteUser(int userId) {
+        users.remove(userId);
+    }
+
+    public List<User> getAllUsers() {
+        return new ArrayList<>(users.values());
+    }
+
+    public User getUser(int userId) {
+        return users.get(userId);
+    }
+
+    public Collection<Long> getFriendsById(int id) {
+        return users.get(id).getFriends();
+    }
+
+    // метод для проверки имени: если имя пустое, используется логин
+    private void checkName(User user) {
+        if (user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+    }
+
+    // метод для валидации юзера
+    private boolean isInvalid(User user) {
+        return (user.getBirthday().isAfter(LocalDate.now())
+                || user.getLogin().contains(" ")
+                || !user.getEmail().contains("@"));
+    }
+    // вспомогательный метод для очистки таблицы
+    public void clearMap() {
+        users.clear();
+        id = 1;
+    }
+
+
+}

@@ -42,11 +42,11 @@ class FilmControllerTest {
     @Test
     void getAll() throws ValidationException {
         filmController.addFilm(validFilm);
-        assertEquals(1, filmController.getAll().size(), "должен быть один фильм");
+        assertEquals(1, filmController.getAllFilms().size(), "должен быть один фильм");
         filmController.addFilm(validFilm1);
-        assertEquals(2, filmController.getAll().size(), "должно быть два фильма");
+        assertEquals(2, filmController.getAllFilms().size(), "должно быть два фильма");
         filmController.addFilm(maxDescriptionLength);
-        assertEquals(3, filmController.getAll().size(), "должно быть три фильма");
+        assertEquals(3, filmController.getAllFilms().size(), "должно быть три фильма");
     }
 
     @Test
@@ -56,17 +56,17 @@ class FilmControllerTest {
         assertThrows(ValidationException.class, () -> filmController.addFilm(negativeDuration), "negative duration");
         assertThrows(ValidationException.class, () -> filmController.addFilm(invalidReleaseDate), "invalid release date");
         assertThrows(ValidationException.class, () -> filmController.addFilm(moreThan200Symbols), "description > 200");
-        assertEquals(0, filmController.getAll().size(), "созданы невалидные фильмы");
+        assertEquals(0, filmController.getAllFilms().size(), "созданы невалидные фильмы");
     }
 
     @Test
     void updateFilm() throws ValidationException {
         filmController.addFilm(validFilm);
-        assertEquals(1, filmController.getAll().size(), "фильм не был создан");
+        assertEquals(1, filmController.getAllFilms().size(), "фильм не был создан");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newBlankName), "blank name");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newNegativeDuration), "negative duration");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newInvalidReleaseDate), "invalid release date");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newMoreThan200Symbols), "description > 200");
-        assertEquals(1, filmController.getAll().size(), "созданы невалидные фильмы");
+        assertEquals(1, filmController.getAllFilms().size(), "созданы невалидные фильмы");
     }
 }

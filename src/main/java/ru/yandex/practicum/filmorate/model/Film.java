@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -25,5 +26,5 @@ public class Film {
     //@Positive
     //@Min(1) то же самое: тесты требуют ошибку сервера(код 500), а такая аннотация дает bad request(код 400)
     private int duration;
-
+    private Set<Long> likes;
 }
