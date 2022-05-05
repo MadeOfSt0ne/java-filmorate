@@ -13,8 +13,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
-    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-    UserService userService = new UserService(inMemoryUserStorage);
+    InMemoryUserStorage userStorage = new InMemoryUserStorage();
+    UserService userService = new UserService(userStorage);
     UserController userController = new UserController(userService);
 
     // Валидные юзеры
@@ -27,16 +27,16 @@ class UserControllerTest {
     @BeforeEach
     void beforeTests() {
         validUser = new User("aa", "Mike", 1,"Mike@gmail.com",LocalDate.of(2000, 2, 2), Set.of());
-        validUser1 = new User("oo@edd.ru", "tt", 2, "Sandy@ya.ru", LocalDate.of(1990, 10, 10));
-        blankName = new User("loginShouldBecomeName", "", 2, "qwerty@qwerty.ru", LocalDate.of(1900, 3, 3));
-        loginWithSpaces = new User("agf dgs", "qwefty", 3, "Peter@yahoo.com", LocalDate.of(2001, 2, 3));
-        blankLogin = new User(" ", "ff", 4, "Joe@mail.ru", LocalDate.of(2020, 5, 5));
-        invalidBirthdate = new User("gg", "op", 5, "John@list.ru", LocalDate.of(2022, 5, 15));
-        newLoginWithSpaces = new User("gjjgjg gjgjgj", "qwerty", 1, "Peter@pringles.com", LocalDate.of(2001, 2, 3));
-        newBlankLogin = new User(" ", "GG", 1, "Artur@yandex-team.ru", LocalDate.of(1987, 2, 18));
-        newInvalidBirthdate = new User("sss", "JJ", 1, "Andrew@bk.ru", LocalDate.of(2025, 1, 1));
+        validUser1 = new User("oo@edd.ru", "tt", 2, "Sandy@ya.ru", LocalDate.of(1990, 10, 10), Set.of());
+        blankName = new User("loginShouldBecomeName", "", 2, "qwerty@qwerty.ru", LocalDate.of(1900, 3, 3), Set.of());
+        loginWithSpaces = new User("agf dgs", "qwefty", 3, "Peter@yahoo.com", LocalDate.of(2001, 2, 3), Set.of());
+        blankLogin = new User(" ", "ff", 4, "Joe@mail.ru", LocalDate.of(2020, 5, 5), Set.of());
+        invalidBirthdate = new User("gg", "op", 5, "John@list.ru", LocalDate.of(2022, 5, 15), Set.of());
+        newLoginWithSpaces = new User("gjjgjg gjgjgj", "qwerty", 1, "Peter@pringles.com", LocalDate.of(2001, 2, 3), Set.of());
+        newBlankLogin = new User(" ", "GG", 1, "Artur@yandex-team.ru", LocalDate.of(1987, 2, 18), Set.of());
+        newInvalidBirthdate = new User("sss", "JJ", 1, "Andrew@bk.ru", LocalDate.of(2025, 1, 1), Set.of());
 
-        inMemoryUserStorage.clearMap();
+        userStorage.clearMap();
     }
 
     @Test

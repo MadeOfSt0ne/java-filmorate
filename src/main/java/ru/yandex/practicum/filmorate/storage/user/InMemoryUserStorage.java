@@ -7,25 +7,22 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    private final HashMap<Integer, User> users = new HashMap<>();
-    private static int id = 0;
+    private final HashMap<Long, User> users = new HashMap<>();
+    private static long id = 0;
 
-    private static int getNextId() {
+    private static long getNextId() {
         return id++;
     }
 
     @Override
     public User addUser(User user) {
-        if (isInvalid(user)) {
-            throw new ValidationException("Ошибка валидации!");
-        }
+        validate(user);
         checkName(user);
         user.setId(getNextId());
         users.put(user.getId(), user);
@@ -37,20 +34,19 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(changedUser.getId())) {
             throw new UserNotFoundException("Пользователь не найден!");
         }
-        if (isInvalid(changedUser)) {
-            throw new ValidationException("Невалидные данные пользователя");
-        }
+        validate(changedUser);
         checkName(changedUser);
         User savedUser = users.get(changedUser.getId());
         savedUser.setName(changedUser.getName());
         savedUser.setEmail(changedUser.getEmail());
         savedUser.setBirthday(changedUser.getBirthday());
         savedUser.setLogin(changedUser.getLogin());
+        savedUser.setFriends(changedUser.getFriends());
         return savedUser;
     }
 
     @Override
-    public void deleteUser(int userId) {
+    public void deleteUser(long userId) {
         users.remove(userId);
     }
 
@@ -60,7 +56,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(int userId) {
+    public User getUser(long userId) {
         return users.get(userId);
     }
 
@@ -72,16 +68,18 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     // метод для валидации юзера
-    private boolean isInvalid(User user) {
-        return (user.getBirthday().isAfter(LocalDate.now())
+    private void validate(User user) {
+        if (user.getBirthday().isAfter(LocalDate.now())
                 || user.getLogin().contains(" ")
-                || !user.getEmail().contains("@"));
+                || !user.getEmail().contains("@")) {
+            throw new ValidationException("Невалидные данные!");
+        }
     }
+
     // вспомогательный метод для очистки таблицы
     public void clearMap() {
         users.clear();
         id = 0;
     }
-
 
 }

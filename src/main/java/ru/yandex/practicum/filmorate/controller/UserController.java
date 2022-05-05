@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @Slf4j
 public class UserController {
+
     private final UserService userService;
 
     @Autowired
