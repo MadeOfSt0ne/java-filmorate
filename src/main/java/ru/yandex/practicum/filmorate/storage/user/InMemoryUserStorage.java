@@ -14,7 +14,7 @@ import java.util.List;
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Long, User> users = new HashMap<>();
-    private static long id = 0;
+    private static long id = 1;
 
     private static long getNextId() {
         return id++;

@@ -14,7 +14,7 @@ import java.util.List;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final HashMap<Integer, Film> films = new HashMap<>();
-    private static int id = 0;
+    private static int id = 1;
 
     private static int getNextId() {
         return id++;
