@@ -18,13 +18,13 @@ public class Film {
     @NonNull
     private String name;
     private int id;
-    //@Size(min = 1, max = 200)
+    @Size(min = 1, max = 200)
     private String description;
     @NonNull
     private LocalDate releaseDate;
     // Аннотация возвращает код 400, а постман тесты требуют 500. Поэтому закомментировал. Принцип работы понятен))
     //@Positive
-    //@Min(1) то же самое: тесты требуют ошибку сервера(код 500), а такая аннотация дает bad request(код 400)
+    @Min(1) //то же самое: тесты требуют ошибку сервера(код 500), а такая аннотация дает bad request(код 400)
     private int duration;
     private Set<Long> likes;
 }

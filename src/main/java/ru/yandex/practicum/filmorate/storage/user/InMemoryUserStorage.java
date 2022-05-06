@@ -22,7 +22,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        validate(user);
+        if (isInvalid(user)) {
+            throw new ValidationException("Невалидные данные");
+        }
         checkName(user);
         user.setId(getNextId());
         users.put(user.getId(), user);
@@ -34,7 +36,9 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(changedUser.getId())) {
             throw new UserNotFoundException("Пользователь не найден!");
         }
-        validate(changedUser);
+        if (isInvalid(changedUser)) {
+            throw new ValidationException("Невалидные данные!");
+        }
         checkName(changedUser);
         User savedUser = users.get(changedUser.getId());
         savedUser.setName(changedUser.getName());
@@ -71,12 +75,10 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     // метод для валидации юзера
-    private void validate(User user) {
-        if (user.getBirthday().isAfter(LocalDate.now())
+    private boolean isInvalid(User user) {
+         return user.getBirthday().isAfter(LocalDate.now())
                 || user.getLogin().contains(" ")
-                || !user.getEmail().contains("@")) {
-            throw new ValidationException("Невалидные данные!");
-        }
+                || !user.getEmail().contains("@");
     }
 
     // вспомогательный метод для очистки таблицы

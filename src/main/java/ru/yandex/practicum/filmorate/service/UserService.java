@@ -28,6 +28,7 @@ public class UserService {
         friend.getFriends().add(user.getId());
         userStorage.updateUser(user);
         userStorage.updateUser(friend);
+
     }
 
     // удаление друга

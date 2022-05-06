@@ -50,12 +50,12 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void addFriend(@PathVariable("id") int id, @PathVariable("friendId") int friendId) {
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void deleteFriend(@PathVariable("id") int id, @PathVariable("friendId") int friendId) {
         userService.removeFriend(id, friendId);
     }
 

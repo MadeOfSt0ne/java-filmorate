@@ -22,7 +22,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        validate(film);
+        if (isInvalid(film)) {
+            throw new ValidationException("Невалидные данные");
+        }
         film.setId(getNextId());
         films.put(film.getId(), film);
         return film;
@@ -33,7 +35,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.containsKey(changedFilm.getId())) {
             throw new FilmNotFoundException("Фильм не найден");
         }
-        validate(changedFilm);
+        if (isInvalid(changedFilm)) {
+            throw new ValidationException("Невалидные данные");
+        }
         Film savedFilm = films.get(changedFilm.getId());
         savedFilm.setName(changedFilm.getName());
         savedFilm.setDescription(changedFilm.getDescription());
@@ -62,16 +66,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     // метод для проверки валидности фильма
-    private void validate(Film film) {
+    private boolean isInvalid(Film film) {
         int MAX_DESCRIPTION_LENGTH = 200;
         LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
-        if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH
+        return film.getDescription().length() > MAX_DESCRIPTION_LENGTH
                 || film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)
                 || film.getName().isBlank()
-                || film.getDuration() <= 0) {
-            throw new ValidationException("Невалидные данные!");
-        }
+                || film.getDuration() <= 0;
     }
 
     // вспомогательный метод для очистки таблицы

@@ -47,10 +47,10 @@ public class FilmService {
     }
 
     // получение списка популярных фильмов
-    public List<Film> getPopular(int amount) {
+    public List<Film> getPopular(int count) {
         return filmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparingInt(f0 -> f0.getLikes().size()))
-                .limit(amount)
+                .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
+                .limit(count)
                 .collect(Collectors.toList());
     }
 

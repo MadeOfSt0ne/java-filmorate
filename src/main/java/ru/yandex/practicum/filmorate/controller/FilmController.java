@@ -58,7 +58,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false) int count) {
+    public Collection<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
         if (count <= 0) {
             throw new IncorrectParameterException("count");
         }
