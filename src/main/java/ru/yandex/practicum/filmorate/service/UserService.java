@@ -21,18 +21,24 @@ public class UserService {
 
     // добавление нового друга
     public void addFriend(long id, long newFriendId) {
-        checkUserAndFriend(id, newFriendId);
+        //checkUserAndFriend(id, newFriendId);
         User user = userStorage.getUser(id);
-        user.getFriends().add(newFriendId);
+        User friend = userStorage.getUser(newFriendId);
+        user.getFriends().add(friend.getId());
+        friend.getFriends().add(user.getId());
         userStorage.updateUser(user);
+        userStorage.updateUser(friend);
     }
 
     // удаление друга
     public void removeFriend(long id, long friendToRemoveId) {
-        checkUserAndFriend(id, friendToRemoveId);
+        //checkUserAndFriend(id, friendToRemoveId);
         User user = userStorage.getUser(id);
-        user.getFriends().remove(friendToRemoveId);
+        User notFriend = userStorage.getUser(friendToRemoveId);
+        user.getFriends().remove(notFriend.getId());
+        notFriend.getFriends().remove(user.getId());
         userStorage.updateUser(user);
+        userStorage.updateUser(notFriend);
     }
 
     // поиск общих друзей для двух пользователей
