@@ -32,9 +32,9 @@ class UserControllerTest {
         loginWithSpaces = new User("agf dgs", "qwefty", 3, "Peter@yahoo.com", LocalDate.of(2001, 2, 3), Set.of());
         blankLogin = new User(" ", "ff", 4, "Joe@mail.ru", LocalDate.of(2020, 5, 5), Set.of());
         invalidBirthdate = new User("gg", "op", 5, "John@list.ru", LocalDate.of(2022, 5, 15), Set.of());
-        newLoginWithSpaces = new User("gjjgjg gjgjgj", "qwerty", 1, "Peter@pringles.com", LocalDate.of(2001, 2, 3), Set.of());
-        newBlankLogin = new User(" ", "GG", 1, "Artur@yandex-team.ru", LocalDate.of(1987, 2, 18), Set.of());
-        newInvalidBirthdate = new User("sss", "JJ", 1, "Andrew@bk.ru", LocalDate.of(2025, 1, 1), Set.of());
+        newLoginWithSpaces = new User("gjjgjg gjgjgj", "qwerty", 0, "Peter@pringles.com", LocalDate.of(2001, 2, 3), Set.of());
+        newBlankLogin = new User(" ", "GG", 0, "Artur@yandex-team.ru", LocalDate.of(1987, 2, 18), Set.of());
+        newInvalidBirthdate = new User("sss", "JJ", 0, "Andrew@bk.ru", LocalDate.of(2025, 1, 1), Set.of());
 
         userStorage.clearMap();
     }
