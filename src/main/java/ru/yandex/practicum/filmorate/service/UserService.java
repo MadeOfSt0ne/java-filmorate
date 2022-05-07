@@ -2,11 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,32 +22,48 @@ public class UserService {
 
     // добавление нового друга
     public void addFriend(long id, long newFriendId) {
-        //checkUserAndFriend(id, newFriendId);
         User user = userStorage.getUser(id);
         User friend = userStorage.getUser(newFriendId);
-        user.getFriends().add(friend.getId());
-        friend.getFriends().add(user.getId());
-        userStorage.updateUser(user);
-        userStorage.updateUser(friend);
-
+        Set<Long> friends1;
+        Set<Long> friends2;
+        // получаем список друзей первого пользователя
+        if (user.getFriends() == null) {
+            friends1 = new HashSet<>();
+        } else {
+            friends1 = user.getFriends();
+        }
+        friends1.add(newFriendId);   // добавляем id второго
+        // получаем список друзей второго пользователя
+        if (friend.getFriends() == null) {
+            friends2 = new HashSet<>();
+        } else {
+            friends2 = friend.getFriends();
+        }
+        friends2.add(id);   // добавляем id первого
+        // обновляем списки друзей
+        user.setFriends(friends1);
+        friend.setFriends(friends2);
+        // обновляем пользователей
+        updateUser(user);
+        updateUser(friend);
     }
 
     // удаление друга
     public void removeFriend(long id, long friendToRemoveId) {
-        //checkUserAndFriend(id, friendToRemoveId);
         User user = userStorage.getUser(id);
         User notFriend = userStorage.getUser(friendToRemoveId);
         user.getFriends().remove(notFriend.getId());
         notFriend.getFriends().remove(user.getId());
         userStorage.updateUser(user);
         userStorage.updateUser(notFriend);
+
     }
 
     // поиск общих друзей для двух пользователей
     public Collection<Long> getCommonFriends(int user1, int user2) {
-        return findFriendsById(user1).stream()
+        return userStorage.getUser(user1).getFriends().stream()
                 .distinct()
-                .filter(findFriendsById(user2)::contains)
+                .filter(userStorage.getUser(user2).getFriends()::contains)
                 .collect(Collectors.toSet());
     }
 
@@ -71,8 +88,10 @@ public class UserService {
     }
 
     // получение списка друзей
-    public Collection<Long> findFriendsById(int id) {
-        return userStorage.getUser(id).getFriends();
+    public Collection<User> findFriendsById(int id) {
+        return userStorage.getUser(id).getFriends().stream()
+                .map(userStorage::getUser)
+                .collect(Collectors.toList());
     }
 
     // удаление пользователя
@@ -80,13 +99,4 @@ public class UserService {
         userStorage.deleteUser(id);
     }
 
-    // метод для проверки существования юзера и друга
-    public void checkUserAndFriend(long userId, long friendId) {
-        if (userStorage.getUser(userId) == null) {
-            throw new UserNotFoundException("Пользователь не найден!");
-        }
-        if (userStorage.getUser(friendId) == null) {
-            throw new UserNotFoundException("Друг не найден!");
-        }
-    }
 }

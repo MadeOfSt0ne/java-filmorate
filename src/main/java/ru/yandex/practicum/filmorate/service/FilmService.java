@@ -2,17 +2,15 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,10 +28,17 @@ public class FilmService {
 
     // добавление лайка фильму
     public void addLike(int filmId, long userId) {
-        //checkUserAndFilm(filmId, userId);
         Film film = filmStorage.getFilm(filmId);
-        User user = userStorage.getUser(userId);
-        film.getLikes().add(user.getId());
+        User user = userStorage.getUser(userId);  // проверка на то, что пользователь существует
+        Set<Long> likes;
+        if (film.getLikes() == null) {
+            likes = new HashSet<>();
+            likes.add(userId);
+        } else {
+            likes = film.getLikes();
+            likes.add(userId);
+        }
+        film.setLikes(likes);
         filmStorage.updateFilm(film);
     }
 
@@ -49,7 +54,7 @@ public class FilmService {
     // получение списка популярных фильмов
     public List<Film> getPopular(int count) {
         return filmStorage.getAllFilms().stream()
-                .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
+                .sorted(this::compare)
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -79,13 +84,14 @@ public class FilmService {
         filmStorage.deleteFilm(id);
     }
 
-    // метод для проверки существования юзера и фильма
-    public void checkUserAndFilm(int filmId, long userId) {
-        if (userStorage.getUser(userId) == null) {
-            throw new UserNotFoundException("Пользователь не найден!");
-        }
-        if (filmStorage.getFilm(filmId) == null) {
-            throw new FilmNotFoundException("Фильм не найден!");
+    // сравнение фильмов по количеству лайков
+    public int compare(Film f1, Film f2) {
+        if (f1.getLikes() == null) {
+            return 1;
+        } else if (f2.getLikes() == null) {
+            return -1;
+        } else {
+            return f2.getLikes().size() - f1.getLikes().size();
         }
     }
 }
