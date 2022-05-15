@@ -4,13 +4,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FilmControllerTest {
-    FilmController filmController = new FilmController();
+    InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+    InMemoryUserStorage userStorage = new InMemoryUserStorage();
+    FilmService filmService = new FilmService(filmStorage, userStorage);
+    FilmController filmController = new FilmController(filmService);
 
     // Валидные фильмы
     static Film validFilm, validFilm1, maxDescriptionLength, newValidFilm;
@@ -22,31 +30,31 @@ class FilmControllerTest {
     @BeforeEach
     void beforeTests() {
         String str = "test";
-        validFilm = new Film("Terminator", 1, "robots vs men", LocalDate.of(1984, 10, 26), 108);
-        validFilm1 = new Film("Avatar", 2, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162);
+        validFilm = new Film("Terminator", 1, "robots vs men", LocalDate.of(1984, 10, 26), 108, Set.of());
+        validFilm1 = new Film("Avatar", 2, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162, Set.of());
         //Film nullName = new Film(null, 3, "robots vs men", LocalDate.of(1984, 10, 26), 108); // тест не запускается - сразу NPE
-        blankName = new Film(" ", 4, "robots vs men", LocalDate.of(1984, 10, 26), 108);
-        maxDescriptionLength = new Film("Titanic", 5, str.repeat(50), LocalDate.of(1997, 11, 1), 194);
-        negativeDuration = new Film("Titanic", 6, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194);
-        zeroDuration = new Film("Titanic", 7, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), 0);
-        invalidReleaseDate = new Film("Titanic", 8, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194);
-        moreThan200Symbols = new Film("Avatar", 9, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162);
-        newBlankName = new Film(" ", 1, "new description", LocalDate.of(1984, 10, 26), 108);
-        newNegativeDuration = new Film("Titanic", 1, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194);
-        newInvalidReleaseDate = new Film("Titanic", 1, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194);
-        newMoreThan200Symbols = new Film("Avatar", 1, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162);
-        newValidFilm = new Film("Avatar", 11, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162);
-        filmController.clearMap();
+        blankName = new Film(" ", 4, "robots vs men", LocalDate.of(1984, 10, 26), 108, Set.of());
+        maxDescriptionLength = new Film("Titanic", 5, str.repeat(50), LocalDate.of(1997, 11, 1), 194, Set.of());
+        negativeDuration = new Film("Titanic", 6, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194, Set.of());
+        zeroDuration = new Film("Titanic", 7, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), 0, Set.of());
+        invalidReleaseDate = new Film("Titanic", 8, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194, Set.of());
+        moreThan200Symbols = new Film("Avatar", 9, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162, Set.of());
+        newBlankName = new Film(" ", 0, "new description", LocalDate.of(1984, 10, 26), 108, Set.of());
+        newNegativeDuration = new Film("Titanic", 0, "ocean liner hits iceberg", LocalDate.of(1997, 11, 1), -194, Set.of());
+        newInvalidReleaseDate = new Film("Titanic", 0, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194, Set.of());
+        newMoreThan200Symbols = new Film("Avatar", 0, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162, Set.of());
+        newValidFilm = new Film("Avatar", 11, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162, Set.of());
+        filmStorage.clearMap();
     }
 
     @Test
     void getAll() throws ValidationException {
         filmController.addFilm(validFilm);
-        assertEquals(1, filmController.getAll().size(), "должен быть один фильм");
+        assertEquals(1, filmController.getAllFilms().size(), "должен быть один фильм");
         filmController.addFilm(validFilm1);
-        assertEquals(2, filmController.getAll().size(), "должно быть два фильма");
+        assertEquals(2, filmController.getAllFilms().size(), "должно быть два фильма");
         filmController.addFilm(maxDescriptionLength);
-        assertEquals(3, filmController.getAll().size(), "должно быть три фильма");
+        assertEquals(3, filmController.getAllFilms().size(), "должно быть три фильма");
     }
 
     @Test
@@ -56,17 +64,17 @@ class FilmControllerTest {
         assertThrows(ValidationException.class, () -> filmController.addFilm(negativeDuration), "negative duration");
         assertThrows(ValidationException.class, () -> filmController.addFilm(invalidReleaseDate), "invalid release date");
         assertThrows(ValidationException.class, () -> filmController.addFilm(moreThan200Symbols), "description > 200");
-        assertEquals(0, filmController.getAll().size(), "созданы невалидные фильмы");
+        assertEquals(0, filmController.getAllFilms().size(), "созданы невалидные фильмы");
     }
 
     @Test
     void updateFilm() throws ValidationException {
         filmController.addFilm(validFilm);
-        assertEquals(1, filmController.getAll().size(), "фильм не был создан");
+        assertEquals(1, filmController.getAllFilms().size(), "фильм не был создан");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newBlankName), "blank name");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newNegativeDuration), "negative duration");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newInvalidReleaseDate), "invalid release date");
         assertThrows(ValidationException.class, () -> filmController.updateFilm(newMoreThan200Symbols), "description > 200");
-        assertEquals(1, filmController.getAll().size(), "созданы невалидные фильмы");
+        assertEquals(1, filmController.getAllFilms().size(), "созданы невалидные фильмы");
     }
 }
