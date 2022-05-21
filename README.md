@@ -1,5 +1,5 @@
 Filmorate project.
-![ER diagram](../blob/add-friends-likes/filmorateERdiagram.png)
+![ER diagram](https://github.com/MadeOfSt0ne/java-filmorate/blob/add-friends-likes/filmorateERdiagram.png)
 1. пример запроса для получения списка фильмов с сортировкой по году выпуска от раннего к позднему
 ```SQL
 SELECT name, release_year
