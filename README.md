@@ -3,23 +3,23 @@ Filmorate project.
 1. пример запроса для получения списка фильмов с сортировкой по году выпуска от раннего к позднему
 ```SQL
 SELECT name, release_year
-FROM movie
+FROM films
 ORDER BY release_year;
 ```
 2. пример запроса для получения списка фильмов в жанре "триллер" с рейтингом PG13
 ```SQL
-SELECT m.name
-FROM movie AS m
-INNER JOIN film_genre AS fg ON m.film_id = fg.film_id
+SELECT f.name
+FROM films AS f
+INNER JOIN film_genre AS fg ON f.film_id = fg.film_id
 INNER JOIN genre AS g ON fg.genre_id = g.genre_id
-WHERE g.name = 'thriller' AND m.rating = 'PG13'
-ORDER BY m.name;
+WHERE g.name = 'thriller' AND f.rating = 'PG13'
+ORDER BY f.name;
 ```
 3. пример запроса для получения списка топ 10 фильмов с сортировкой по количеству лайков
 ```SQL
-SELECT m.name, COUNT(l.user_id)
-FROM movie AS m
-LEFT OUTER JOIN likes AS l ON m.film_id = l.film_id
+SELECT f.name, COUNT(l.user_id)
+FROM films AS f
+LEFT OUTER JOIN likes AS l ON f.film_id = l.film_id
 ORDER BY COUNT(l.user_id)
 LIMIT 10;
 ```
