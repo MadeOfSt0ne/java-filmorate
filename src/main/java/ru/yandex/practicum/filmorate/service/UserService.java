@@ -60,10 +60,19 @@ public class UserService {
     }
 
     // поиск общих друзей для двух пользователей
-    public Collection<Long> getCommonFriends(int user1, int user2) {
-        return userStorage.getUser(user1).getFriends().stream()
+    public Set<User> getCommonFriends(int user1, int user2) {
+        if (userStorage.getUser(user1).getFriends() == null || userStorage.getUser(user2).getFriends() == null) {
+            return new HashSet<>();
+        }
+        // получение списка id общих друзей
+        /*return userStorage.getUser(user1).getFriends().stream()
                 .distinct()
                 .filter(userStorage.getUser(user2).getFriends()::contains)
+                .collect(Collectors.toSet());*/
+        // получение списка друзей общих друзей
+        return findFriendsById(user1).stream()
+                .distinct()
+                .filter(findFriendsById(user2)::contains)
                 .collect(Collectors.toSet());
     }
 
