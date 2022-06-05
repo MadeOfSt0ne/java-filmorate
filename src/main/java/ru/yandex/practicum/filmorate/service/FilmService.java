@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -18,16 +21,22 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final LikeStorage likeStorage;
 
     // зависимость UserStorage внедрена для проверки существования пользователей, которые ставят лайки
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage,
+                       LikeStorage likeStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.likeStorage = likeStorage;
     }
 
+    /* Эти методы используются для inMemory хранения
+
     // добавление лайка фильму
-    public void addLike(int filmId, long userId) {
+    public void addLike(long filmId, long userId) {
         Film film = filmStorage.getFilm(filmId);
         User user = userStorage.getUser(userId);  // проверка на то, что пользователь существует
         Set<Long> likes;
@@ -43,7 +52,7 @@ public class FilmService {
     }
 
     // удаление лайка
-    public void deleteLike(int filmId, long userId) {
+    public void deleteLike(long filmId, long userId) {
         //checkUserAndFilm(filmId, userId);
         Film film = filmStorage.getFilm(filmId);
         User user = userStorage.getUser(userId);
@@ -59,6 +68,17 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    // сравнение фильмов по количеству лайков
+    public int compare(Film f1, Film f2) {
+        if (f1.getLikes() == null) {
+            return 1;
+        } else if (f2.getLikes() == null) {
+            return -1;
+        } else {
+            return f2.getLikes().size() - f1.getLikes().size();
+        }
+    }
+*/
     // получение списка всех фильмов
     public Collection<Film> getAllFilms() {
         return filmStorage.getAllFilms();
@@ -75,23 +95,34 @@ public class FilmService {
     }
 
     // поиск фильма
-    public Film getFilm(int id) {
+    public Film getFilm(long id) {
         return filmStorage.getFilm(id);
     }
 
     // удаление фильма
-    public void deleteFilm(int id) {
+    public void deleteFilm(long id) {
         filmStorage.deleteFilm(id);
     }
 
-    // сравнение фильмов по количеству лайков
-    public int compare(Film f1, Film f2) {
-        if (f1.getLikes() == null) {
-            return 1;
-        } else if (f2.getLikes() == null) {
-            return -1;
-        } else {
-            return f2.getLikes().size() - f1.getLikes().size();
-        }
+    // получаем 2 id, с помощью билдера делаем из них лайк, а затем передаем его в хранилище
+    public void addLike(long filmId, long userId) {
+        likeStorage.addLike(Like.builder()
+                .film(getFilm(filmId))
+                .user(userStorage.getUser(userId))
+                .build());
     }
+
+    // получаем 2 id, с помощью билдера делаем из них лайк, а затем передаем его в хранилище
+    public void deleteLike(long filmId, long userId) {
+        likeStorage.deleteLike(Like.builder()
+                .film(getFilm(filmId))
+                .user(userStorage.getUser(userId))
+                .build());
+    }
+
+    // получаем список популярных фильмов
+    public Collection<Film> getPopular(int count) {
+        return likeStorage.getPopular(count);
+    }
+
 }

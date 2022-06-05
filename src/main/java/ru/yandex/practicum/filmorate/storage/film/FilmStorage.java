@@ -10,9 +10,9 @@ public interface FilmStorage {
     // обновление фильма
     Film updateFilm(Film film);
     // удаление фильма
-    void deleteFilm(int id);
+    void deleteFilm(long id);
     // поиск фильма
-    Film getFilm(int id);
+    Film getFilm(long id);
     // список всех фильмов
     List<Film> getAllFilms();
 }

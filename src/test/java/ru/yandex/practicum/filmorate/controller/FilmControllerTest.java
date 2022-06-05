@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.film.impl.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.film.impl.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.impl.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.impl.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -15,10 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FilmControllerTest {
-    InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
-    InMemoryUserStorage userStorage = new InMemoryUserStorage();
-    FilmService filmService = new FilmService(filmStorage, userStorage);
-    FilmController filmController = new FilmController(filmService);
+    FilmController filmController;
+    UserController userController;
 
     // Валидные фильмы
     static Film validFilm, validFilm1, maxDescriptionLength, newValidFilm;
@@ -44,7 +44,7 @@ class FilmControllerTest {
         newInvalidReleaseDate = new Film("Titanic", 0, "ocean liner hits iceberg", LocalDate.of(1895, 12, 27), 194, Set.of());
         newMoreThan200Symbols = new Film("Avatar", 0, str.repeat(50) + "Q", LocalDate.of(2009, 12, 10), 162, Set.of());
         newValidFilm = new Film("Avatar", 11, "people fight navi for minerals", LocalDate.of(2009, 12, 10), 162, Set.of());
-        filmStorage.clearMap();
+
     }
 
     @Test
