@@ -1,26 +1,24 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
 
-@RestController
 @Slf4j
+@RestController
+@RequiredArgsConstructor
 public class FilmController {
 
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @GetMapping("/films")
     public Collection<Film> getAllFilms() {
@@ -62,6 +60,16 @@ public class FilmController {
             throw new IncorrectParameterException("count");
         }
         return filmService.getPopular(count);
+    }
+
+    @GetMapping("/genres/{id}")
+    public Collection<Genre> getGenre(@PathVariable(required = false) Integer id) {
+        return filmService.getGenres(id);
+    }
+
+    @GetMapping("/mpa/{id}")
+    public Collection<MpaaRating> getMpaa(@PathVariable(required = false) Integer id) {
+        return filmService.getMpaa(id);
     }
 
 }

@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Like;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -125,4 +123,11 @@ public class FilmService {
         return likeStorage.getPopular(count);
     }
 
+    public Collection<Genre> getGenres(Integer id) {
+        return filmStorage.getGenre(id);
+    }
+
+    public Collection<MpaaRating> getMpaa(Integer id) {
+        return filmStorage.getRating(id);
+    }
 }

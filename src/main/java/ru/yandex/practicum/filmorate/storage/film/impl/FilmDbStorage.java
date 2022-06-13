@@ -1,13 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.film.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Like;
+import ru.yandex.practicum.filmorate.model.MpaaRating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 
@@ -21,27 +25,44 @@ import java.util.Objects;
 
 @Slf4j
 @Component
+@Repository
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage, LikeStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
+    private static final String SQL_INSERT_FILM = "INSERT INTO films (name, description, duration, release_date, rating_id) " +
+            "VALUES (?, ?, ?, ?, ?);";
+    private static final String SQL_UPDATE_FILM = "UPDATE films SET " +
+            "name = ?, description = ?, duration = ?, release_date = ?, rating_id = ? WHERE id = ?;";
+    private static final String SQL_DELETE_FILM = "DELETE FROM films WHERE id = ?;";
+    private static final String SQL_GET_FILM = "SELECT id, name, description, duration, release_date, rating_id " +
+            "FROM films WHERE id = ?;";
+    private static final String SQL_GET_ALL_FILMS = "SELECT id, name, description, duration, release_date, rating_id " +
+            "FROM films;";
+    private static final String SQL_GET_ALL_GENRES = "SELECT * FROM genre;";
+    private static final String SQL_GET_GENRE = "SELECT * FROM genre WHERE id = ?;";
+    private static final String SQL_GET_ALL_RATINGS = "SELECT * FROM MPAA_rating;";
+    private static final String SQL_GET_RATING = "SELECT * FROM MPAA_rating WHERE id = ?;";
+    private static final String SQL_INSERT_LIKE = "INSERT INTO likes (film_id, user_id) " + "VALUES (?, ?);";
+    private static final String SQL_DELETE_LIKE = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
+    private static final String SQL_GET_POPULAR = "SELECT * FROM films AS f " +
+            "LEFT OUTER JOIN likes AS l ON f.film_id = l.film_id " +
+            "ORDER BY COUNT(l.user_id) DESC " +
+            "LIMIT ?;";
+    
+    
     // добавление фильма
     @Override
     public Film addFilm(Film film) {
-        String sqlInsert = "INSERT INTO films (name, description, duration, release_date, rating_id) " +
-                "VALUES (?, ?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlInsert, new String[] {"id"});
+            PreparedStatement stmt = connection.prepareStatement(SQL_INSERT_FILM, new String[] {"id"});
             stmt.setString(1, film.getName());
             stmt.setString(2, film.getDescription());
             stmt.setInt(3, film.getDuration());
             stmt.setDate(4, Date.valueOf(film.getReleaseDate()));
-            stmt.setInt(5, film.getRatingId());
+            stmt.setInt(5, film.getMpa().getId());
             return stmt;
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
@@ -51,15 +72,12 @@ public class FilmDbStorage implements FilmStorage, LikeStorage {
     // обновление фильма
     @Override
     public Film updateFilm(Film film) {
-        String sqlUpdate = "UPDATE films SET " +
-                "name = ?, description = ?, duration = ?, release_date = ?, rating_id = ? " +
-                "WHERE id = ?;";
-        jdbcTemplate.update(sqlUpdate,
+        jdbcTemplate.update(SQL_UPDATE_FILM,
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
                 film.getReleaseDate(),
-                film.getRatingId(),
+                film.getMpa(),
                 film.getId());
         return film;
     }
@@ -67,17 +85,14 @@ public class FilmDbStorage implements FilmStorage, LikeStorage {
     // удаление фильма
     @Override
     public void deleteFilm(long id) {
-        String sqlDelete = "DELETE FROM films WHERE id = ?;";
-        jdbcTemplate.update(sqlDelete, id);
+        jdbcTemplate.update(SQL_DELETE_FILM, id);
     }
 
     // поиск фильма
     @Override
     public Film getFilm(long id) {
-        String sqlGet = "SELECT id, name, description, duration, release_date, rating_id " +
-                "FROM films WHERE id = ?;";
         try {
-            return jdbcTemplate.queryForObject(sqlGet, this::mapRowToFilm, id);
+            return jdbcTemplate.queryForObject(SQL_GET_FILM, this::mapRowToFilm, id);
         } catch (Exception e) {
             log.debug("Фильм с id={} не найден", id);
             throw new FilmNotFoundException(e.getMessage());
@@ -92,40 +107,65 @@ public class FilmDbStorage implements FilmStorage, LikeStorage {
                 .description(resultSet.getString("description"))
                 .duration(resultSet.getInt("duration"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                .ratingId(resultSet.getInt("rating_id"))
+                .mpa(MpaaRating.builder().id(resultSet.getInt("rating_id")).build())
+                .build();
+    }
+
+    // метод для маппинга строки из БД в жанр
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return Genre.builder()
+                .id(resultSet.getInt("id"))
+                .name(resultSet.getString("name"))
+                .build();
+    }
+
+    // метод для маппинга строки из БД в mpaa рейтинг
+    private MpaaRating mapRowToRating(ResultSet resultSet, int rowNum) throws SQLException {
+        return MpaaRating.builder()
+                .id(resultSet.getInt("id"))
+                .name(resultSet.getString("name"))
                 .build();
     }
 
     // получение списка всех фильмов
     @Override
     public List<Film> getAllFilms() {
-        String sqlGetAll = "SELECT id, name, description, duration, release_date, rating_id " +
-                "FROM films;";
-        return jdbcTemplate.query(sqlGetAll, this::mapRowToFilm);
+        return jdbcTemplate.query(SQL_GET_ALL_FILMS, this::mapRowToFilm);
+    }
+
+    // получение жанров
+    @Override
+    public Collection<Genre> getGenre(Integer id) {
+        if (id == null) {
+            return jdbcTemplate.query(SQL_GET_ALL_GENRES, this::mapRowToGenre);
+        }
+        return jdbcTemplate.query(SQL_GET_GENRE, this::mapRowToGenre, id);
+    }
+
+    // получение рейтингов mpaa
+    @Override
+    public Collection<MpaaRating> getRating(Integer id) {
+        if (id == null) {
+            return jdbcTemplate.query(SQL_GET_ALL_RATINGS, this::mapRowToRating);
+        }
+        return jdbcTemplate.query(SQL_GET_RATING, this::mapRowToRating, id);
     }
 
     // добавление лайка
     @Override
     public void addLike(Like like) {
-        String sqlLike = "INSERT INTO likes (film_id, user_id) " + "VALUES (?, ?);";
-        jdbcTemplate.update(sqlLike, like.getFilm().getId(), like.getUser().getId());
+        jdbcTemplate.update(SQL_INSERT_LIKE, like.getFilm().getId(), like.getUser().getId());
     }
 
     // удаление лайка
     @Override
     public void deleteLike(Like like) {
-        String sqlDislike = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
-        jdbcTemplate.update(sqlDislike, like.getFilm().getId(), like.getUser().getId());
+        jdbcTemplate.update(SQL_DELETE_LIKE, like.getFilm().getId(), like.getUser().getId());
     }
 
     // получение списка популярных фильмов
     @Override
     public Collection<Film> getPopular(int count) {
-        String sqlPopular = "SELECT * " +
-                "FROM films AS f " +
-                "LEFT OUTER JOIN likes AS l ON f.film_id = l.film_id " +
-                "ORDER BY COUNT(l.user_id) DESC " +
-                "LIMIT ?;";
-        return jdbcTemplate.query(sqlPopular, this::mapRowToFilm, count);
+        return jdbcTemplate.query(SQL_GET_POPULAR, this::mapRowToFilm, count);
     }
 }

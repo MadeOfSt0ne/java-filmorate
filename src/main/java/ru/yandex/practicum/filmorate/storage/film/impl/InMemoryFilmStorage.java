@@ -4,10 +4,13 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaaRating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,7 +47,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         savedFilm.setDescription(changedFilm.getDescription());
         savedFilm.setReleaseDate(changedFilm.getReleaseDate());
         savedFilm.setDuration(changedFilm.getDuration());
-        savedFilm.setLikes(changedFilm.getLikes());
+        //savedFilm.setLikes(changedFilm.getLikes());
         return savedFilm;
     }
 
@@ -64,6 +67,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Collection<Genre> getGenre(Integer id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<MpaaRating> getRating(Integer id) {
+        throw new UnsupportedOperationException();
     }
 
     // метод для проверки валидности фильма

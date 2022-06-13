@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MpaaRating {
+public class Genre {
     private int id;
     private String name;
 }
