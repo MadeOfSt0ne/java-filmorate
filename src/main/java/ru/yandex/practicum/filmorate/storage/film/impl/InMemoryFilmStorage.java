@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+/*
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -96,3 +97,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         id = 0;
     }
 }
+*/

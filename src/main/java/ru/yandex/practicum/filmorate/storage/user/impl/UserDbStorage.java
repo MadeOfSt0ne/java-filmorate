@@ -1,32 +1,28 @@
 package ru.yandex.practicum.filmorate.storage.user.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserDbStorage implements UserStorage, FriendsStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final String SQL_INSERT_USER = "INSERT INTO users (name, login, email, birthday) " +
             "VALUES (?, ?, ?, ?)";
@@ -40,23 +36,26 @@ public class UserDbStorage implements UserStorage, FriendsStorage {
     private static final String SQL_DELETE_FRIEND = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?;";
     private static final String SQL_GET_FRIENDS = "SELECT friend_id FROM friends WHERE user_id = ?;";
 
+    // добавление нового пользователя
     @Override
     public User addUser(User user) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(SQL_INSERT_USER, new String[] {"id"});
-            stmt.setString(1, user.getName());
-            stmt.setString(2, user.getLogin());
-            stmt.setString(3, user.getEmail());
-            stmt.setDate(4, Date.valueOf(user.getBirthday()));
-            return stmt;
-        }, keyHolder);
-        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        if(validate(user)) throw new ValidationException("Данные не валидны");
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("users")
+                .usingGeneratedKeyColumns("user_id");
+        try{
+            long id = simpleJdbcInsert.executeAndReturnKey(user.toMap()).intValue();
+            user.setId(id);
+        } catch (Exception ex){
+            log.info(ex.getMessage());
+        }
         return user;
     }
 
+    // обновление пользователя
     @Override
     public User updateUser(User user) {
+        if (validate(user)) throw new ValidationException("Данные не валидны");
         jdbcTemplate.update(SQL_UPDATE_USER,
                 user.getName(),
                 user.getLogin(),
@@ -66,6 +65,7 @@ public class UserDbStorage implements UserStorage, FriendsStorage {
         return user;
     }
 
+    // поиск пользователя
     @Override
     public User getUser(long id) {
         try {
@@ -87,11 +87,13 @@ public class UserDbStorage implements UserStorage, FriendsStorage {
                 .build();
     }
 
+    // получение списка всех пользователей
     @Override
     public List<User> getAllUsers() {
         return jdbcTemplate.query(SQL_GET_ALL_USERS, this::mapRowToUser);
     }
 
+    // удаление пользователч
     @Override
     public void deleteUser(long id) {
         jdbcTemplate.update(SQL_DELETE_USER, id);
@@ -113,5 +115,10 @@ public class UserDbStorage implements UserStorage, FriendsStorage {
     @Override
     public Collection<Long> getFriends(long userId) {
         return jdbcTemplate.query(SQL_GET_FRIENDS, (rs, rowNum) -> rs.getLong("friend_id"), userId);
+    }
+
+    private boolean validate(User user) {
+        return user.getBirthday().isAfter(LocalDate.now())
+                || user.getLogin().contains(" ");
     }
 }

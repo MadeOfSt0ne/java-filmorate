@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -24,47 +25,9 @@ public class UserService {
         this.friendsStorage = friendsStorage;
     }
 
-    // добавление нового друга
-    public void addFriend(long id, long newFriendId) {
-        User user = userStorage.getUser(id);
-        User friend = userStorage.getUser(newFriendId);
-        Set<Long> friends1;
-        Set<Long> friends2;
-        // получаем список друзей первого пользователя
-        if (user.getFriends() == null) {
-            friends1 = new HashSet<>();
-        } else {
-            friends1 = user.getFriends();
-        }
-        friends1.add(newFriendId);   // добавляем id второго
-        // получаем список друзей второго пользователя
-        if (friend.getFriends() == null) {
-            friends2 = new HashSet<>();
-        } else {
-            friends2 = friend.getFriends();
-        }
-        friends2.add(id);   // добавляем id первого
-        // обновляем списки друзей
-        user.setFriends(friends1);
-        friend.setFriends(friends2);
-        // обновляем пользователей
-        updateUser(user);
-        updateUser(friend);
-    }
-
-    // удаление друга
-    public void removeFriend(long id, long friendToRemoveId) {
-        User user = userStorage.getUser(id);
-        User notFriend = userStorage.getUser(friendToRemoveId);
-        user.getFriends().remove(notFriend.getId());
-        notFriend.getFriends().remove(user.getId());
-        userStorage.updateUser(user);
-        userStorage.updateUser(notFriend);
-    }
-
     // поиск общих друзей для двух пользователей
-    public Set<User> getCommonFriends(int user1, int user2) {
-        if (userStorage.getUser(user1).getFriends() == null || userStorage.getUser(user2).getFriends() == null) {
+    public Set<Long> getCommonFriends(Long user1, Long user2) {
+        if (friendsStorage.getFriends(user1) == null || friendsStorage.getFriends(user2) == null) {
             return new HashSet<>();
         }
         // получение списка id общих друзей
@@ -94,21 +57,32 @@ public class UserService {
         return userStorage.updateUser(user);
     }
 
+    // удаление пользователя
+    public void deleteUser(Long id) {
+        userStorage.deleteUser(id);
+    }
+
     // поиск по id
-    public User findUserById(int id) {
+    public User findUserById(Long id) {
         return userStorage.getUser(id);
     }
 
     // получение списка друзей
-    public Collection<User> findFriendsById(int id) {
-        return userStorage.getUser(id).getFriends().stream()
-                .map(userStorage::getUser)
-                .collect(Collectors.toList());
+    public Collection<Long> findFriendsById(Long id) {
+        return friendsStorage.getFriends(id);
     }
 
-    // удаление пользователя
-    public void deleteUser(int id) {
-        userStorage.deleteUser(id);
+    // добавление дружбы
+    public void addFriend(Long id, Long friendId) {
+        User user = findUserById(id);
+        User friend = findUserById(friendId);
+        friendsStorage.addFriend(Friendship.builder().user(user).friend(friend).build());
     }
 
+    // удаление дружбы
+    public void removeFriend(Long id, Long friendId) {
+        User user = findUserById(id);
+        User friend = findUserById(friendId);
+        friendsStorage.deleteFriend(Friendship.builder().user(user).friend(friend).build());
+    }
 }

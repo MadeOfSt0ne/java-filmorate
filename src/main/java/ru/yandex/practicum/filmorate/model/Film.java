@@ -21,5 +21,5 @@ public class Film {
     @NotNull
     private MpaaRating mpa;
     private Set<Genre> genre;
-    //private Set<Long> likes;
+
 }

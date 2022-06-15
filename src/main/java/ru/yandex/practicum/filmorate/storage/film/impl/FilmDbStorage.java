@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -25,7 +24,6 @@ import java.util.Objects;
 
 @Slf4j
 @Component
-@Repository
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage, LikeStorage {
 
@@ -48,15 +46,13 @@ public class FilmDbStorage implements FilmStorage, LikeStorage {
     private static final String SQL_DELETE_LIKE = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
     private static final String SQL_GET_POPULAR = "SELECT * FROM films AS f " +
             "LEFT OUTER JOIN likes AS l ON f.film_id = l.film_id " +
-            "ORDER BY COUNT(l.user_id) DESC " +
-            "LIMIT ?;";
-    
-    
+            "ORDER BY COUNT(l.user_id) DESC LIMIT ?;";
+
     // добавление фильма
     @Override
     public Film addFilm(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
+        int updated = jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(SQL_INSERT_FILM, new String[] {"id"});
             stmt.setString(1, film.getName());
             stmt.setString(2, film.getDescription());
@@ -65,8 +61,18 @@ public class FilmDbStorage implements FilmStorage, LikeStorage {
             stmt.setInt(5, film.getMpa().getId());
             return stmt;
         }, keyHolder);
-        film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-        return film;
+        if (updated == 1) {
+            return Film.builder()
+                    .id(Objects.requireNonNull(keyHolder.getKey()).longValue())
+                    .name(film.getName())
+                    .description(film.getDescription())
+                    .duration(film.getDuration())
+                    .releaseDate(film.getReleaseDate())
+                    .mpa(film.getMpa())
+                    .build();
+        } else {
+            throw new IllegalStateException();
+        }
     }
 
     // обновление фильма
